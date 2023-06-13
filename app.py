@@ -29,12 +29,12 @@ connect_db(app)
 # User signup/login/logout
 
 
-@app.before_request
-def add_user_to_g():
+@app.before_request #This occurs before every request
+def add_user_to_g(): #g is used to store data during an application context
     """If we're logged in, add curr user to Flask global."""
 
     if CURR_USER_KEY in session:
-        g.user = User.query.get(session[CURR_USER_KEY])
+        g.user = User.query.get(session[CURR_USER_KEY]) #Take user data from session and add to Flask Global
 
     else:
         g.user = None
@@ -209,6 +209,11 @@ def stop_following(follow_id):
     return redirect(f"/users/{g.user.id}/following")
 
 
+@app.route('/users/add_like/<int:msg_id>', methods=['POST'])
+def add_like(msg_id):
+    """Adds chosen """
+
+
 @app.route('/users/profile', methods=["GET", "POST"])
 def profile():
     """Update profile for current user."""
@@ -217,20 +222,19 @@ def profile():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    user = User.query.get_or_404(g.user.id)
-    form = UserEditForm(obj=user)
+    form = UserEditForm(obj=g.user)
 
     if form.validate_on_submit():
         password = form.password.data
-        if User.authenticate(user.username, password):
-            user.username = form.username.data
-            user.email = form.email.data
-            user.image_url = form.image_url.data
-            user.header_image_url = form.header_image_url.data
-            user.bio = form.bio.data
+        if User.authenticate(g.user.username, password):
+            g.user.username = form.username.data
+            g.user.email = form.email.data
+            g.user.image_url = form.image_url.data
+            g.user.header_image_url = form.header_image_url.data
+            g.user.bio = form.bio.data
 
             db.session.commit()
-            return redirect(f'/users/{user.id}')
+            return redirect(f'/users/{g.user.id}')
         
         flash("Invalid password.", 'danger')
         return redirect('/')
