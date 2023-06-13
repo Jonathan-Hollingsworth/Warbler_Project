@@ -211,7 +211,32 @@ def stop_following(follow_id):
 
 @app.route('/users/add_like/<int:msg_id>', methods=['POST'])
 def add_like(msg_id):
-    """Adds chosen """
+    """Adds chosen message to current user's likes"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    message = Message.query.get_or_404(msg_id)
+    g.user.likes.append(message)
+    db.session.commit()
+
+    return redirect('/')
+
+
+@app.route('/users/remove_like/<int:msg_id>', methods=['POST'])
+def remove_like(msg_id):
+    """Removes chosen message from current user's likes"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    
+    message = Message.query.get_or_404(msg_id)
+    g.user.likes.remove(message)
+    db.session.commit()
+
+    return redirect('/')
 
 
 @app.route('/users/profile', methods=["GET", "POST"])
