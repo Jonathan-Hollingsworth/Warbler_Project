@@ -230,6 +230,11 @@ def add_like(msg_id):
         return redirect("/")
     
     message = Message.query.get_or_404(msg_id)
+
+    if message.user == g.user:
+        flash("You cannot like your own message.", "danger")
+        return redirect("/")
+    
     g.user.likes.append(message)
     db.session.commit()
 
@@ -338,6 +343,10 @@ def messages_destroy(message_id):
         return redirect("/")
 
     msg = Message.query.get(message_id)
+    if msg.user != g.user:
+        flash("You cannot delete someone else's message.", "danger")
+        return redirect("/")
+    
     db.session.delete(msg)
     db.session.commit()
 
